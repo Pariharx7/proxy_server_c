@@ -17,6 +17,8 @@
 
 #define MAX_CLIENTS 10
 #define MAX_BYTES 4096
+#define MAX_ELEMENT_SIZE 10*(1<<10)
+#define MAX_SIZE 200*(1<<10)
 
 typedef struct cache_element cache_element;
 
@@ -360,4 +362,35 @@ cache_element *find(char* url){
         temp_loc_val = pthread_mutex_unlock(&lock);
         printf("Lock is unlocked\n");
         return site;
+}
+
+int add_cache_element(char *data, int size, char *url){
+    int temp_lock_val = pthread_mutex_lock(&lock);
+    printf("Add Cache Lock Acquired %d \n", temp_lock_val);
+    int element_size = size + 1 + strlen(url)+sizeof(cache_element);
+    if(element_size>MAX_ELEMENT_SIZE){
+        temp_lock_val = pthread_mutex_unlock(&lock);
+        printf("Add cache lock is unlocked\n");
+        return 0;
+    }
+    else{
+        while(cache_size+element_size > MAX_SIZE){
+            remove_cache_element();
+        }
+        cache_element *element = (cache_element *)malloc(sizeof(cache_element));
+        element->data = (char*) malloc(size+1);
+        strcpy(element->data,data);
+        element->url = (char*)malloc(1+ (strlen(url)*sizeof(char)));
+        strcpy(element->url, url);
+        element->lru_time_track = time(NULL);
+        element->next = head;
+        element->len = size;
+        head = element;
+        cache_size += element_size;
+        temp_lock_val = pthread_mutex_unlock(&lock);
+        printf("Add cache lock is unlocked\n");
+        return 1;
+    }
+    return 0;
+    //Timestamp:  1:43:29
 }
