@@ -13,3 +13,5 @@ clean:
 
 tar:
 	tar -cvzf ass1.tgz proxyserver.c README Makefile proxy_parse.c proxy_parse.h
+
+	
