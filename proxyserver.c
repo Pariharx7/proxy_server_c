@@ -1,6 +1,6 @@
 #include "proxy_parse.h"
 #include <stdio.h>
-#include <stdlib.h>;
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -23,7 +23,7 @@
 typedef struct cache_element cache_element;
 
 struct cache_element{
-    char *data;
+    char* data;
     int len;
     char* url;
     time_t lru_time_track;
@@ -31,7 +31,7 @@ struct cache_element{
 };
 
 cache_element* find(char* url);
-int add_cache_element(char* data, int size, char* = url);
+int add_cache_element(char* data, int size, char* url);
 void remove_cache_element();
 
 int port_number = 8080;
@@ -51,7 +51,7 @@ int connectRemoteServer(char* host_addr, int port_num){
     }
     struct hostent* host = gethostbyname(host_addr);
     if(host == NULL){
-        frpintf(stderr, "No such host exits\n");
+        fprintf(stderr, "No such host exists.\n");
         return -1;
     }
     struct sockaddr_in server_addr;
