@@ -27,7 +27,7 @@ struct cache_element{
     int len;
     char* url;
     time_t lru_time_track;
-    cache_element* next
+    cache_element* next;
 };
 
 cache_element* find(char* url);
@@ -60,14 +60,14 @@ int connectRemoteServer(char* host_addr, int port_num){
     server_addr.sin_port = htons(port_num);
 
     bcopy((char *)&host -> h_addr, (char *)&server_addr.sin_addr.s_addr, host->h_length);
-    if(connect(remoteSocket, (struct sockaddr *)&server_addr), (size_t)sizeof(server_addr)<0){
-        frpintf(stderr, "Error in connecting\n");
+    if(connect(remoteSocket, (struct sockaddr*)&server_addr, (socklen_t)sizeof(server_addr))<0){
+        fprintf(stderr, "Error in connecting\n");
         return -1;
     }
     return remoteSocket;
 }
 
-int handle_request(int clientSocketId, ParsedRequest *request, char* tempReq){
+int handle_request(int clientSocket, ParsedRequest *request, char *tempReq){
     char *buff(char *)malloc(sizeof(char)*MAX_BYTES);
     strcpy(buff,"GET");
     strcat(buff,request->path);
