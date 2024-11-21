@@ -182,10 +182,10 @@ int sendErrorMessage(int socket, int status_code){
 int checkHTTPversion(char *msg){
     int version = -1;
 
-    if(strcmp(msg, "HTTP/1.1", 8) == 0){
+    if(strncmp(msg, "HTTP/1.1", 8) == 0){
         version = 1;
     }
-    else if(strcmp(msg, "HTTP/1.0", 8) == 0){
+    else if(strncmp(msg, "HTTP/1.0", 8) == 0){
         version = 1;
     }
     else{
@@ -198,7 +198,7 @@ int checkHTTPversion(char *msg){
 void *thread_fn(void *socketNew){
     sem_wait(&semaphore);
     int p;
-    sem_getvalue(&semaphore, p);
+    sem_getvalue(&semaphore, &p);
     printf("Semaphore value is: %d\n",p);
     int *t = (int*)socketNew;
     int socket = *t;
@@ -210,8 +210,8 @@ void *thread_fn(void *socketNew){
 
     while(bytes_send_client > 0){
         len = strlen(buffer);
-        if(substr(buffer, "\r\n\r\n") == NULL){
-            bytes_send_client = recv(socket, buffer + len, MAX_BYTES - len, 0)
+        if(strstr(buffer, "\r\n\r\n") == NULL){
+            bytes_send_client = recv(socket, buffer + len, MAX_BYTES - len, 0);
         }else{
             break;
         }
@@ -239,14 +239,14 @@ void *thread_fn(void *socketNew){
         printf("%s\n\n", response);
     }else if(bytes_send_client >0){
         len = strlen(buffer);
-        ParsedRequest *request = ParsedRequest_create();
+        ParsedRequest* request = ParsedRequest_create();
 
         if(ParsedRequest_parse(request, buffer, len) < 0){
             printf("parsing failed\n");
         }else{
             bzero(buffer, MAX_BYTES);
-            if(!strcmp(request -> method, "GET")){
-                if(request -> host && request -> path && checkHTTPversion(request->version)==1){
+            if(!strcmp(request->method, "GET")){
+                if(request->host && request->path && checkHTTPversion(request->version)==1){
                     bytes_send_client = handle_request(socket, request, tempReq);
                     if(bytes_send_client == -1){
                         sendErrorMessage(socket, 500);
@@ -347,7 +347,7 @@ cache_element *find(char* url){
     if(head != NULL){
         site = head;
         while(site != NULL){
-            if(!strcmp(site->url, url)){
+            if(!strncmp(site->url, url)){
                 printf("LRU time track before: %ld", site->lru_time_track);
                 printf("\n url found\n");
                 site->lru_time_track = time(NULL);
