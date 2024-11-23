@@ -195,7 +195,7 @@ int checkHTTPversion(char *msg){
     return version;
 }
 
-void *thread_fn(void *socketNew){
+void* thread_fn(void* socketNew){
     sem_wait(&semaphore);
     int p;
     sem_getvalue(&semaphore, &p);
@@ -246,7 +246,7 @@ void *thread_fn(void *socketNew){
         }else{
             bzero(buffer, MAX_BYTES);
             if(!strcmp(request->method, "GET")){
-                if(request->host && request->path && checkHTTPversion(request->version)==1){
+                if(request->host && request->path && (checkHTTPversion(request->version)==1)){
                     bytes_send_client = handle_request(socket, request, tempReq);
                     if(bytes_send_client == -1){
                         sendErrorMessage(socket, 500);
@@ -262,7 +262,7 @@ void *thread_fn(void *socketNew){
     }else if(bytes_send_client == 0){
         printf("client is disconnected\n");
     }
-    shutdown(socket, SHUT_ROWR);
+    shutdown(socket, SHUT_RDWR);
     close(socket);
     free(buffer);
     sem_post(&semaphore);
@@ -277,7 +277,7 @@ int main(int argc, char* argv[]){
     struct sockaddr_in server_addr, client_addr;
     sem_init(&semaphore,0, MAX_CLIENTS);
     pthread_mutex_init(&lock, NULL);
-    if(argv == 2){
+    if(argc == 2){
         port_number = atoi(argv[1]);
     }else{
         printf("Too few arguments\n");
@@ -314,7 +314,7 @@ int main(int argc, char* argv[]){
     while(1){
         bzero((char *)&client_addr, sizeof(client_addr));
         client_len = sizeof(client_addr);
-        client_socketId = accept(proxy_socketId, (struct socketaddr *)&client_addr, (socklen_t*)&client_len);
+        client_socketId = accept(proxy_socketId, (struct socketaddr*)&client_addr, (socklen_t*)&client_len);
 
         if(client_socketId<0){
             printf("Not able to connect\n");
@@ -324,10 +324,10 @@ int main(int argc, char* argv[]){
             Connected_socketId[i] = client_socketId;
         }
 
-        sockaddr_in * client_pt = (struct sockaddr_in *)*client_addr;
+        struct sockaddr_in* client_pt = (struct sockaddr_in*)&client_addr;
         struct in_addr ip_addr = client_pt -> sin_addr;
         char str[INET_ADDRSTRLEN];
-        inet_ntop[AF_INET, &ip_addr, str, INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, &ip_addr, str, INET_ADDRSTRLEN);
         printf("Client is connected with port number %d and ip address is %s\n",ntohs(client_addr.sin_port),str);
 
         pthread_create(&tid[i], NULL, thread_fn, (void *)&Connected_socketId[i]);
@@ -343,11 +343,11 @@ int main(int argc, char* argv[]){
 cache_element *find(char* url){
     cache_element * site = NULL;
     int temp_lock_val = pthread_mutex_lock(&lock);
-    printf("Remove cache Lock acquired %d \n", temp_loc_val);
+    printf("Remove cache Lock acquired %d \n", temp_lock_val);
     if(head != NULL){
         site = head;
         while(site != NULL){
-            if(!strncmp(site->url, url)){
+            if(!strcmp(site->url, url)){
                 printf("LRU time track before: %ld", site->lru_time_track);
                 printf("\n url found\n");
                 site->lru_time_track = time(NULL);
@@ -359,7 +359,7 @@ cache_element *find(char* url){
     }else{
             printf("Url not found\n");
         }
-        temp_loc_val = pthread_mutex_unlock(&lock);
+        temp_lock_val = pthread_mutex_unlock(&lock);
         printf("Lock is unlocked\n");
         return site;
 }
@@ -372,11 +372,14 @@ void remove_cache_element(){
     int temp_lock_val = pthread_mutex_lock(&lock);
     printf("Lock is acquired\n");
     if(head!=NULL){
-        for(q=head, p=head, temp=head; q->next!=NULL; q:q->next){
+        for(q=head, p=head, temp=head; q->next !=NULL; q=q->next){
             if(((q->next)->lru_time_track)<(temp->lru_time_track)){
                 temp = q->next;
                 p = q;
             }
+        }
+        if(temp == head){
+            head = head -> next;
         }
         else{
             p->next = temp->next;
