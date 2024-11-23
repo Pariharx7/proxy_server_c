@@ -200,7 +200,7 @@ void* thread_fn(void* socketNew){
     int p;
     sem_getvalue(&semaphore, &p);
     printf("Semaphore value is: %d\n",p);
-    int *t = (int*)socketNew;
+    int* t = (int*)socketNew;
     int socket = *t;
     int bytes_send_client, len;
 
@@ -217,20 +217,20 @@ void* thread_fn(void* socketNew){
         }
     }
 
-    char *tempReq = (char *)malloc(strlen(buffer)*sizeof(char)+1);
+    char *tempReq = (char*)malloc(strlen(buffer)*sizeof(char)+1);
     for(int i = 0; i < strlen(buffer); i++){
         tempReq[i] = buffer[i];
     }
 
     struct cache_element* temp = find(tempReq);
     if(temp != NULL){
-        int size = temp -> len/sizeof(char);
+        int size = temp->len/sizeof(char);
         int pos = 0;
         char response[MAX_BYTES];
         while(pos < size){
             bzero(response, MAX_BYTES);
             for(int i = 0; i < MAX_BYTES; i++){
-                response[i] = temp -> data[i];
+                response[i] = temp->data[pos];
                 pos++;
             }
             send(socket, response, MAX_BYTES, 0);
