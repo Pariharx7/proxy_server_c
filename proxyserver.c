@@ -68,14 +68,14 @@ int connectRemoteServer(char* host_addr, int port_num){
 }
 
 int handle_request(int clientSocket, ParsedRequest *request, char *tempReq){
-    char *buff(char *)malloc(sizeof(char)*MAX_BYTES);
-    strcpy(buff,"GET");
-    strcat(buff,request->path);
-    strcat(buff, " ");
-    strcar(buff, request->version);
-    strcat(buff, "\r\n");
+    char *buf(char *)malloc(sizeof(char)*MAX_BYTES);
+    strcpy(buf,"GET");
+    strcat(buf,request->path);
+    strcat(buf, " ");
+    strcar(buf, request->version);
+    strcat(buf, "\r\n");
 
-    size_t len = strlen(buff);
+    size_t len = strlen(buf);
 
     if(ParsedHeader_set(request, "Connection", "close")< 0){
         printf("set header key is not working");
@@ -87,7 +87,7 @@ int handle_request(int clientSocket, ParsedRequest *request, char *tempReq){
         }
     }
 
-    if(ParsedRequest_unparse_headers(request, buff+len, (size_t)MAX_BYTES-len)<0){
+    if(ParsedRequest_unparse_headers(request, buf+len, (size_t)MAX_BYTES-len)<0){
         printf("unparse failed");
     }
     
@@ -99,18 +99,18 @@ int handle_request(int clientSocket, ParsedRequest *request, char *tempReq){
     if(remoteSocketId < 0){
         return -1;
     }
-    int bytes_send = send(remoteSocketId, buff, strlen(buff),0);
-    bzero(buff, MAX_BYTES);
+    int bytes_send = send(remoteSocketId, buf, strlen(buf),0);
+    bzero(buf, MAX_BYTES);
 
-    bytes_send = recv(remoteSocketId, buff, MAX_BYTES - 1; 0);
+    bytes_send = recv(remoteSocketId, buf, MAX_BYTES - 1; 0);
     char * temp_buffer = (char*)malloc(sizeof(char)*MAX_BYTES);
     int temp_buffer_size = MAX_BYTES;
     int temp_buffer_index = 0;
 
     while(bytes_send > 0){
-        bytes_send = send(clientSocketId, buff, bytes_send, 0);
+        bytes_send = send(clientSocketId, buf, bytes_send, 0);
         for(int i = 0; i < bytes_send/sizeof(char);i++){
-            temp_buffer[temp_buffer_index] = buff[i];
+            temp_buffer[temp_buffer_index] = buf[i];
             temp_buffer_index++;
         }
         temp_buffer_size += MAX_BYTES;
@@ -119,12 +119,12 @@ int handle_request(int clientSocket, ParsedRequest *request, char *tempReq){
             perror("Error in sending data to the client\n");
             break;
         }
-        bzero(buff,MAX_BYTES);
-        bytes_send = recv(remoteSocketId, buff, MAX_BYTES - 1, 0);
+        bzero(buf,MAX_BYTES);
+        bytes_send = recv(remoteSocketId, buf, MAX_BYTES - 1, 0);
         
     }
     temp_buffer[temp_buffer_index] = '\0';
-    free(buff);
+    free(buf);
     add_cache_element(temp_buffer,strlen(temp_buffer),tempReq);
     free(temp_buffer);
     close(remoteSocketId);
