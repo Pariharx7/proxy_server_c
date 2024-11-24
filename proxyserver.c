@@ -67,12 +67,12 @@ int connectRemoteServer(char* host_addr, int port_num){
     return remoteSocket;
 }
 
-int handle_request(int clientSocket, ParsedRequest *request, char *tempReq){
-    char *buf(char *)malloc(sizeof(char)*MAX_BYTES);
+int handle_request(int clientSocket,struct ParsedRequest *request, char *tempReq){
+    char *buf = (char*)malloc(sizeof(char)*MAX_BYTES);
     strcpy(buf,"GET");
     strcat(buf,request->path);
     strcat(buf, " ");
-    strcar(buf, request->version);
+    strcat(buf, request->version);
     strcat(buf, "\r\n");
 
     size_t len = strlen(buf);
