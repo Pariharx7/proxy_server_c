@@ -59,7 +59,7 @@ int connectRemoteServer(char* host_addr, int port_num){
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port_num);
 
-    bcopy((char *)&host -> h_addr, (char *)&server_addr.sin_addr.s_addr, host->h_length);
+    bcopy((char *)host->h_addr,(char *)&server_addr.sin_addr.s_addr,host->h_length);
     if(connect(remoteSocket, (struct sockaddr*)&server_addr, (socklen_t)sizeof(server_addr))<0){
         fprintf(stderr, "Error in connecting\n");
         return -1;
@@ -102,13 +102,13 @@ int handle_request(int clientSocket,struct ParsedRequest *request, char *tempReq
     int bytes_send = send(remoteSocketId, buf, strlen(buf),0);
     bzero(buf, MAX_BYTES);
 
-    bytes_send = recv(remoteSocketId, buf, MAX_BYTES - 1; 0);
+    bytes_send = recv(remoteSocketId, buf, MAX_BYTES - 1, 0);
     char * temp_buffer = (char*)malloc(sizeof(char)*MAX_BYTES);
     int temp_buffer_size = MAX_BYTES;
     int temp_buffer_index = 0;
 
     while(bytes_send > 0){
-        bytes_send = send(clientSocketId, buf, bytes_send, 0);
+        bytes_send = send(clientSocket, buf, bytes_send, 0);
         for(int i = 0; i < bytes_send/sizeof(char);i++){
             temp_buffer[temp_buffer_index] = buf[i];
             temp_buffer_index++;
@@ -239,7 +239,7 @@ void* thread_fn(void* socketNew){
         printf("%s\n\n", response);
     }else if(bytes_send_client >0){
         len = strlen(buffer);
-        ParsedRequest* request = ParsedRequest_create();
+        struct ParsedRequest* request = ParsedRequest_create();
 
         if(ParsedRequest_parse(request, buffer, len) < 0){
             printf("parsing failed\n");
@@ -266,7 +266,7 @@ void* thread_fn(void* socketNew){
     close(socket);
     free(buffer);
     sem_post(&semaphore);
-    sem_getvalue(&semaphore, p);
+    sem_getvalue(&semaphore, &p);
     printf("Semaphore post value is: %d\n", p);
     free(tempReq);
     return NULL;
